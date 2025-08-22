@@ -124,16 +124,13 @@ func HandleError(file string) error {
 		   line == "##end"   && IndexOfLine+1 < len(ArrFile) && !IsValidRoom(&ArrFile[IndexOfLine+1]) || 
 		   line == "##start" && FoundStart == 1 ||
 		   line == "##end"   && FoundStart == 1 ||
-		   line == "##start" && IndexOfLine+1 > len(ArrFile) ||
-		   line == "##end"   && IndexOfLine+1 > len(ArrFile){ return errors.New("ERROR: " + "Problem In your ##start or ##end")   }
+		   line == "##start" && IndexOfLine+1 >= len(ArrFile) ||
+		   line == "##end"   && IndexOfLine+1 >= len(ArrFile){ return errors.New("ERROR: " + "Problem In your ##start or ##end")   }
 
 		// Check the lines if links or rooms
 		if 		  !IsValidRoomV && !IsValidLinkV { return errors.New("ERROR: " + "You have problem in this line : "+ line) }
 		if         IsValidRoomV &&  InRooms      { NameRoom, x, y := ExtractDataRoom(&line) ; Data.Roms[NameRoom] = Romms{X: x,Y: y} ; continue ;
-		} else if  IsValidLinkV &&  InLinks      { 
-			NameRoom1, NameRoom2 := ExtractDataLink(&line) ; 
-			Data.Links[NameRoom1] = append(Data.Links[NameRoom1], NameRoom2) ; 
-			continue ;
+		} else if  IsValidLinkV &&  InLinks      { NameRoom1, NameRoom2 := ExtractDataLink(&line) ; Data.Links[NameRoom1] = append(Data.Links[NameRoom1], NameRoom2) ; continue ;
 		} else if  IsValidLinkV &&  InRooms      { InRooms = false ; InLinks = true ; continue ;
 		} else if  IsValidRoomV &&  InLinks      { return errors.New("ERROR: " + "You place this room after link(s) : "+ line) ;}
 	}
