@@ -162,13 +162,21 @@ func HandleError(file string) error {
 			NameRoom, x, y := ExtractDataRoom(&line)
 			Data.Roms[NameRoom] = Romms{X: x, Y: y}
 			continue
-		} else if IsValidLinkV && InLinks {
-			NameRoom1, NameRoom2 := ExtractDataLink(&line)
-			Data.Links[NameRoom1] = append(Data.Links[NameRoom1], NameRoom2)
-			continue
 		} else if IsValidLinkV && InRooms {
 			InRooms = false
 			InLinks = true
+
+		}
+		if IsValidLinkV && InLinks {
+
+			NameRoom1, NameRoom2 := ExtractDataLink(&line)
+			if !contains(Data.Links[NameRoom2], NameRoom1) {
+				Data.Links[NameRoom1] = append(Data.Links[NameRoom1], NameRoom2)
+			}
+			if !contains(Data.Links[NameRoom2], NameRoom1) {
+				Data.Links[NameRoom2] = append(Data.Links[NameRoom2], NameRoom1)
+			}
+
 			continue
 		} else if IsValidRoomV && InLinks {
 			return errors.New("ERROR: " + "You place this room after link(s) : " + line)
@@ -189,3 +197,14 @@ func HandleError(file string) error {
 
 	return nil
 }
+
+func contains(s []string, target string) bool {
+	for _, v := range s {
+		if v == target {
+			return true
+		}
+	}
+	return false
+}
+
+// Then:
