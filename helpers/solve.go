@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"fmt"
-	"strings"
+	"time"
 )
 
 func FindPaths() [][]string {
@@ -49,17 +49,33 @@ func Solve(paths [][]string) {
 	if len(paths) == 0 {
 		return
 	}
-	ants := 0
-	print := []string{}
-	// moveAnts := []string{}
-	for ants < Data.Nmber_Ants {
-		for _, v := range paths {
-			if ants >= Data.Nmber_Ants {
-				return
+
+	type Ant struct {
+		ID       int
+		Path     []string
+		Position int
+	}
+	antID := 0
+	ants := make([]*Ant, 0, Data.Nmber_Ants)
+
+	room3amra := make(map[string]bool) // we put every buzy room here to true
+	round := 0                         // it count rounds in eatch iteration
+
+	for {
+		printmoves := []string{} // this is will use for appending output string
+		round++
+		newAnts := []*Ant{} // will append ants moves at level
+
+		for p, path := range paths {
+			for room := range path {
+				// move one ant
+				newAnt := &Ant{ID: antID + 1, Position: room, Path: paths[p]}
+				ants = append(ants, newAnt)
+				printmoves = append(printmoves, fmt.Sprintf("L%d-%s", antID, path[room]))
+				room3amra[path[room]] = true
+				fmt.Println(printmoves)
+				time.Sleep(1 * time.Second)
 			}
-			ants++
-			print = append(print, fmt.Sprintf("L%d-%s", ants, v[1]))
-			fmt.Println(strings.Join(print, " "))
 		}
 	}
 }
