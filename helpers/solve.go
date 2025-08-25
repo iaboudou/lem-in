@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -45,37 +46,93 @@ func FindPaths() [][]string {
 	return AllPaths
 }
 
+type Ant struct {
+	ID       int
+	Path     []string
+	Position int
+}
+type Room struct {
+	Name    string
+	Channel chan *Ant
+}
+
+var ChMoves = make(chan string, 1000) // will take the string into print
+
 func Solve(paths [][]string) {
 	if len(paths) == 0 {
 		return
 	}
 
-	type Ant struct {
-		ID       int
-		Path     []string
-		Position int
+	// here we build channel for each path
+	channs := [][]*Room{}
+	for _, path := range paths {
+		channs = append(channs, buildchannel(path))
 	}
-	antID := 0
-	ants := make([]*Ant, 0, Data.Nmber_Ants)
 
-	room3amra := make(map[string]bool) // we put every buzy room here to true
-	round := 0                         // it count rounds in eatch iteration
+	antID := 1
+	for i := 0; i < len(channs) && antID <= Data.Nmber_Ants; i++ {
+		rooms := channs[i]
 
-	for {
-		printmoves := []string{} // this is will use for appending output string
-		round++
-		newAnts := []*Ant{} // will append ants moves at level
+		ant := &Ant{ID: antID, Path: paths[i], Position: 0}
+		rooms[0].Channel <- ant
 
-		for p, path := range paths {
-			for room := range path {
-				// move one ant
-				newAnt := &Ant{ID: antID + 1, Position: room, Path: paths[p]}
-				ants = append(ants, newAnt)
-				printmoves = append(printmoves, fmt.Sprintf("L%d-%s", antID, path[room]))
-				room3amra[path[room]] = true
-				fmt.Println(printmoves)
-				time.Sleep(1 * time.Second)
+		go moveAnt(ant, rooms)
+		antID++
+
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	done := 0
+	roundMoves := []string{}
+
+	for done < Data.Nmber_Ants {
+		for len(ChMoves) > 0 {
+			move := <-ChMoves
+			roundMoves = append(roundMoves, move)
+
+			for _, path := range paths {
+				if strings.Contains(move, path[len(path)-1]) {
+					done++
+					break
+				}
 			}
 		}
+
+		if len(roundMoves) > 0 {
+			fmt.Println(strings.Join(roundMoves, " "))
+			roundMoves = []string{}
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+}
+
+// will build a channel for each room in path that has size= 1
+func buildchannel(path []string) []*Room {
+	rooms := make([]*Room, len(path))
+
+	for i, name := range path {
+		size := 1
+		if i == 0 || i == len(path)-1 {
+			size = Data.Nmber_Ants
+		}
+		rooms[i] = &Room{Name: name, Channel: make(chan *Ant, size)}
+	}
+	return rooms
+}
+
+// just move ants don't be afraid, the room will take just one ant ////////////////////////
+func moveAnt(a *Ant, rooms []*Room) {
+	for i := 1; i < len(rooms); {
+		rooms[i].Channel <- a
+		ChMoves <- fmt.Sprintf("L%d-%s", a.ID, rooms[i].Name)
+
+		if i > 0 {
+			<-rooms[i-1].Channel
+		}
+
+		a.Position = i
+		i++
+		time.Sleep(30 * time.Millisecond)
 	}
 }
