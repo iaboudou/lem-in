@@ -11,5 +11,10 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Succes file")
+	for _,v := range helpers.FindPaths() {
+		fmt.Println(v)
+	}
+	fmt.Println("*************************\n***************************")
+	fp := helpers.FindPaths()
+	helpers.Solve(fp)	
 }
