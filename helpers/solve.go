@@ -34,49 +34,179 @@ func FindPaths() [][]string {
 	return AllPaths
 }
 
+type Room struct {
+	Name string
+	Nmla int
+}
+
 var (
-	IdNemla = 1
-	Room    = make(map[string]int)
+	room3amra     = make(map[string]bool)
+	done      int = 0
+	finished  int = 0
 )
 
-func PrnintNemla(id int, path []string) {
-	for i := len(path) - 1; i > 0; i-- {
-		if Room[path[i]] == 0 && Room[path[i-1]] == id {
-			Room[path[i]] = id
-			Room[path[i-1]] = 0
-			fmt.Printf("L%d-%s ", id, path[i])
+func PirntNmla(Path []*Room) {
+	if len(Path) < 2 {
+		return
+	}
+
+	for i := len(Path) - 2; i >= 1; i-- {
+		if Path[i].Nmla == 0 {
+			continue
+		}
+		from, to := Path[i].Name, Path[i+1].Name
+		fromIdNmla := Path[i].Nmla
+
+		Path[i].Nmla, Path[i+1].Nmla = 0, fromIdNmla
+
+		// check if "to" is "room3amra"
+		if to != Data.End && to != Data.Start {
+			if room3amra[to] {
+				continue
+			}
+		}
+
+		if to != Data.End {
+			room3amra[to] = true
+			room3amra[from] = false
+		}
+		fmt.Printf("L%d-%s ", fromIdNmla, to)
+
+	}
+
+	// put the next ants in the begining
+	if done < Data.Nmber_Ants && Path[1].Nmla == 0 {
+		if !room3amra[Path[1].Name] {
+			done++
+			Path[1].Nmla = done
+			room3amra[Path[1].Name] = true
+			fmt.Printf("L%d-%s ", done, Path[1].Name)
 		}
 	}
+
+	// for i := len(Path) - 2; i >= 1; i-- {
+	// 	if Path[i].Nmla == 0 {
+	// 		continue
+	// 	}
+	// 	willgoto := Path[i+1].Name
+	// 	willgofrom := Path[i].Name
+	// 	id := Path[i].Nmla
+
+	// 	Path[i].Nmla = 0
+	// 	Path[i+1].Nmla = id
+
+	// 	if willgoto != Data.Start && willgoto != Data.End {
+	// 		if room3amra[willgoto] {
+	// 			continue
+	// 		}
+	// 	}
+
+	// 	if willgoto != Data.Start && willgoto != Data.End {
+	// 		room3amra[willgoto] = true
+	// 	}
+	// 	if willgofrom != Data.Start && willgofrom != Data.End {
+	// 		room3amra[willgofrom] = false
+	// 	}
+
+	// 	if willgoto == Data.End {
+	// 		finished++
+	// 	}
+
+	// 	fmt.Printf("L%d-%s ", id, willgoto)
+	// }
+
+	// if done < Data.Nmber_Ants && Path[1].Nmla == 0 {
+	// 	if Path[1].Name == Data.Start || Path[1].Name == Data.End || !room3amra[Path[1].Name] {
+	// 		done++
+	// 		Path[1].Nmla = done
+	// 		if Path[1].Name != Data.Start && Path[1].Name != Data.End {
+	// 			room3amra[Path[1].Name] = true
+	// 		}
+	// 		fmt.Printf("L%d-%s ", done, Path[1].Name)
+	// 	}
+	// }
 }
 
 func Solve(Paths [][]string) {
-	ants := make([]int, Data.Nmber_Ants)
-	for i := 0; i < Data.Nmber_Ants; i++ {
-		ants[i] = i + 1
+	NewPaths := make([][]*Room, len(Paths))
+	for i, Path := range Paths {
+		Pth := make([]*Room, len(Path))
+		for j, roomName := range Path {
+			Pth[j] = &Room{Name: roomName, Nmla: 0}
+		}
+		NewPaths[i] = Pth
 	}
 
-	count := 0
-	for {
-		moved := false
-		for _, path := range Paths {
-			if len(ants) > 0 && Room[path[0]] == 0 {
-				id := ants[0]
-				ants = ants[1:]
-				Room[path[0]] = id
-				moved = true
-			}
-			for id := 1; id <= Data.Nmber_Ants; id++ {
-				PrnintNemla(id, path)
-			}
-		}
-		if !moved {
-			break
+	for finished < Data.Nmber_Ants {
+		for i := 0; i < len(NewPaths); i++ {
+			PirntNmla(NewPaths[i])
 		}
 		fmt.Println()
-		count++
 	}
 }
 
+// type Room struct {
+// 	Name string
+// 	Nmla int
+// }
+
+// var IdNmla int = 0
+
+// func PirntNmla(Path []*Room) {
+// 	IdNmla++
+// 	if IdNmla > Data.Nmber_Ants {
+// 		return
+// 	}
+// 	for i := len(Path) - 2; i >= 1; i-- {
+// 		if Path[i].Nmla == 0 {
+// 			continue
+// 		}
+
+// 		temp := Path[i].Nmla
+// 		Path[i].Nmla = 0
+// 		Path[i-1].Nmla = temp
+// 		if i != 1 {
+// 			fmt.Println("here")
+// 			fmt.Printf("L%d-%s ", IdNmla, Path[i].Name)
+// 		}
+// 	}
+// 	Path[1].Nmla = IdNmla
+// 	fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
+// }
+
+// func Solve(Paths [][]string) {
+// 	// start := make([]int, Data.Nmber_Ants)
+// 	// for i := 1; i <= Data.Nmber_Ants; i++ {
+// 	// 	start[i-1] = i
+// 	// }
+
+// 	NewPaths := make([][]*Room, len(Paths))
+// 	for i, Path := range Paths {
+// 		Pth := make([]*Room, len(Path))
+// 		for j, roomName := range Path {
+// 			Pth[j] = &Room{Name: roomName, Nmla: 0}
+// 		}
+// 		NewPaths[i] = Pth
+// 	}
+
+// 	for IdNmla <= Data.Nmber_Ants {
+// 		for i := 0; i < len(NewPaths); i++ {
+// 			PirntNmla(NewPaths[i])
+// 			if IdNmla > Data.Nmber_Ants {
+// 				break
+// 			}
+// 		}
+// 		fmt.Println()
+// 		// for i := 0; i < len(NewPaths) ; i++ {
+// 		// 	for j := 1 ; j < len(NewPaths[i]) ; j++ {
+// 		// 		if NewPaths[i][j].Nmla != 0 {
+// 		// 			fmt.Print(NewPaths[i][j].Name," -> ",NewPaths[i][j].Nmla," ")
+// 		// 		}
+// 		// 	}
+// 		// 	fmt.Println()
+// 		// }
+// 	}
+// }
 
 // func Solve(paths [][]string) {
 // 	if len(paths) == 0 {
