@@ -28,6 +28,7 @@ var Data = Lemin{
 	Links: make(map[string][]string),
 }
 
+// function to check if the room is valid or no 
 func IsValidRoom(line *string) bool {
 	if (*line)[0] == 'L' {
 		return false
@@ -54,6 +55,7 @@ func IsValidRoom(line *string) bool {
 	return true
 }
 
+// function to extract the name of the room and the position from the currnt line
 func ExtractDataRoom(line *string) (string, int, int) {
 	var NameRoom string
 	var x, y int
@@ -64,6 +66,7 @@ func ExtractDataRoom(line *string) (string, int, int) {
 	return NameRoom, x, y
 }
 
+// function to check if the link between rooms if is valid or no 
 func IsValidLink(line *string) bool {
 	Chunks := strings.Split(*line, "-")
 	if len(Chunks) != 2 || len(Chunks[0]) > 50 || len(Chunks[1]) > 50 {
@@ -82,6 +85,7 @@ func IsValidLink(line *string) bool {
 	return true
 }
 
+// function to extract the name of the rooms witch they are connected 
 func ExtractDataLink(line *string) (string, string) {
 	var NameRoom1, NameRoom2 string
 	Arr := strings.Split(*line, "-")
@@ -91,6 +95,7 @@ func ExtractDataLink(line *string) (string, string) {
 	return NameRoom1, NameRoom2
 }
 
+// this function handles all the logic of pars and return the errors
 func HandleError(file string) error {
 	ArrBytes, err := os.ReadFile(PathFiles + file)
 	if err != nil {
@@ -198,6 +203,7 @@ func HandleError(file string) error {
 	return nil
 }
 
+// contains we use it for check if the target exists in the array we give it and returns bool
 func contains(s []string, target string) bool {
 	for _, v := range s {
 		if v == target {
@@ -206,5 +212,3 @@ func contains(s []string, target string) bool {
 	}
 	return false
 }
-
-// Then:
