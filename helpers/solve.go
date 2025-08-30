@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"fmt"
-	"time"
 )
 
 type visit struct {
@@ -39,12 +38,11 @@ func FindPaths() [][]string {
 				q = append(q, temp)
 			}
 		}
-		
-		if last == Data.Start{
+
+		if last == Data.Start {
 			visited[last] = visit{vI: visited[last].vI + 1, vB: true}
 		}
 		visited[last] = visit{vI: visited[last].vI + 1, vB: visited[last].vB}
-
 
 	}
 
@@ -69,48 +67,54 @@ type Room struct {
 }
 
 var (
-	room3amra     = make(map[string]bool)
-	done      int = 0
-	finished  int = 0
+	IdNmla   int = 1
+	finished int = 0
 )
 
 func PirntNmla(Path []*Room) {
 	if len(Path) < 2 {
 		return
 	}
+
 	for i := len(Path) - 2; i >= 1; i-- {
-		time.Sleep(90 * time.Millisecond)
-		if Path[i].Nmla == 0 {
-			continue
-		}
-		from, to := Path[i].Name, Path[i+1].Name
+		to := Path[i+1].Name
 		fromIdNmla := Path[i].Nmla
-
-		if room3amra[to] && to != Data.End {
+		
+		if fromIdNmla == 0 || Path[i+1].Nmla != 0 && to != Data.End {
 			continue
 		}
-		Path[i].Nmla = 0
-
+		
 		if to == Data.End {
 			finished++
-		} else {
-			Path[i+1].Nmla = fromIdNmla
-			room3amra[to] = true
 		}
-
-		if from != Data.End {
-			room3amra[from] = false
-		}
+		
+		Path[i].Nmla = 0
+		// fmt.Print("\n",Path[i].Name,"\n")
+		Path[i+1].Nmla = fromIdNmla
+		
 		fmt.Printf("L%d-%s ", fromIdNmla, to)
-	}
-	// put the next ants in the begining
-	if done < Data.Nmber_Ants && Path[1].Nmla == 0 {
-		if !room3amra[Path[1].Name] {
-			done++
-			Path[1].Nmla = done
-			room3amra[Path[1].Name] = true
-			fmt.Printf("L%d-%s ", done, Path[1].Name)
+		if i == 1{
+			// fmt.Println("is 1")
 		}
+	}
+
+	if len(Path) == 2 && IdNmla <= Data.Nmber_Ants && Path[1].Nmla == 0 {
+		// fmt.Println("here")
+		fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
+		IdNmla++
+		finished++
+		return
+	}
+
+	// fmt.Print("\nkahsha tkon 0 -> ",Path[1].Nmla, " \n")
+	if IdNmla <= Data.Nmber_Ants && Path[1].Nmla == 0 {
+		Path[1].Nmla = IdNmla
+		if Path[1].Name == Data.End {
+			finished++
+		}
+		fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
+		IdNmla++
+		// fmt.Println("dkhel ")
 	}
 }
 
