@@ -1,41 +1,89 @@
 package helpers
 
-import (
-	"fmt"
+import "fmt"
+
+var (
+	Ta = []string{}
+
+	Visited = make(map[string]bool)
+	Exists  = make(map[string]bool)
+
+	AllPaths = [][]string{}
+	Levels   = make(map[string]int)
 )
 
-// this fucntion loop over the "Data.Links" and  return all the exists paths in a graph
-func FindPaths() [][]string {
-	AllPaths := [][]string{}
-	if len(Data.Links) == 0 {
-		return nil
-	}
-	q := [][]string{{Data.Start}}
-	visited := map[string]bool{Data.Start: true}
-	for len(q) > 0 {
-		path := q[0]
-		last := path[len(path)-1]
-		q = q[1:]
+func Levelchecker() {
+	visited := make(map[string]bool)
 
-		for _, n := range Data.Links[last] {
-			if visited[n] {
-				continue
-			}
-			temp := append([]string{}, path...)
-			temp = append(temp, n)
+	// BFS queue
+	queue := []string{Data.Start}
+	Levels[Data.Start] = 0
+	visited[Data.Start] = true
 
-			if n == Data.End {
-				AllPaths = append(AllPaths, temp)
-			} else {
-				q = append(q, temp)
-				visited[n] = true
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, neighbor := range Data.Links[current] {
+			if !visited[neighbor] {
+				visited[neighbor] = true
+				Levels[neighbor] = Levels[current] + 1
+				queue = append(queue, neighbor)
 			}
 		}
 	}
-	return AllPaths
 }
 
-// define Room in A path
+func SV(end string, Ta []string) {
+	if _, ok := Data.Links[end]; !ok {
+		return
+	}
+
+	for _, v := range Data.Links[end] {
+
+		if Exists[Ta[len(Ta)-1]] {
+			return
+		}
+		if Exists[v] {
+			continue
+		}
+		if v == Data.End {
+
+			Ta = append(Ta, v)
+
+			for j := 1; j < len(Ta)-1; j++ {
+				Exists[Ta[j]] = true
+			}
+
+			AllPaths = append(AllPaths, Ta)
+
+			return
+
+		}
+
+		if Visited[v] || Levels[end]>Levels[v]{
+			continue
+		}
+
+		// Chana<-v
+		Visited[v] = true
+		newTa := make([]string, len(Ta))
+		copy(newTa, Ta)
+		newTa = append(newTa, v)
+		SV(v, newTa)
+		Visited[v] = false
+	}
+}
+
+func FindPaths() {
+	Levelchecker()
+	Ta = []string{Data.Start}
+
+	Visited[Data.Start] = true
+
+	SV(Data.Start, Ta)
+}
+
 type Room struct {
 	Name string
 	Nmla int
@@ -46,10 +94,7 @@ var (
 	finished int = 0
 )
 
-var NewPaths [][]*Room
-
-// the fucntion move ants forward along the path, starting from the last to the first room
-func PirntNmla(Path []*Room, indexPath int) {
+func PirntNmla(Path []*Room) {
 	if len(Path) < 2 {
 		return
 	}
@@ -67,36 +112,37 @@ func PirntNmla(Path []*Room, indexPath int) {
 		}
 
 		Path[i].Nmla = 0
+		// fmt.Print("\n",Path[i].Name,"\n")
 		Path[i+1].Nmla = fromIdNmla
 
 		fmt.Printf("L%d-%s ", fromIdNmla, to)
-
-		if i == 1 && Data.Nmber_Ants-IdNmla < len(Path)-2 {
-			if indexPath != 0 && (len(NewPaths[indexPath])-len(NewPaths[indexPath-1]) > 1) {
-				return
-			}
+		if i == 1 {
+			// fmt.Println("is 1")
 		}
 	}
 
+	if len(Path) == 2 && IdNmla <= Data.Nmber_Ants && Path[1].Nmla == 0 {
+		// fmt.Println("here")
+		fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
+		IdNmla++
+		finished++
+		return
+	}
+
+	// fmt.Print("\nkahsha tkon 0 -> ",Path[1].Nmla, " \n")
 	if IdNmla <= Data.Nmber_Ants && Path[1].Nmla == 0 {
-		if len(Path) == 2 {
-			fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
-			IdNmla++
-			finished++
-			return
-		}
 		Path[1].Nmla = IdNmla
 		if Path[1].Name == Data.End {
 			finished++
 		}
 		fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
 		IdNmla++
+		// fmt.Println("dkhel ")
 	}
 }
 
-// this fucntion try to loop over the path it print all the moves did to reach the end, it take a matrix of string the initlialize a room in every case
 func Solve(Paths [][]string) {
-	NewPaths = make([][]*Room, len(Paths))
+	NewPaths := make([][]*Room, len(Paths))
 	for i, Path := range Paths {
 		Pth := make([]*Room, len(Path))
 		for j, roomName := range Path {
@@ -107,7 +153,7 @@ func Solve(Paths [][]string) {
 
 	for finished < Data.Nmber_Ants {
 		for i := 0; i < len(NewPaths); i++ {
-			PirntNmla(NewPaths[i], i)
+			PirntNmla(NewPaths[i])
 		}
 		fmt.Println()
 	}
