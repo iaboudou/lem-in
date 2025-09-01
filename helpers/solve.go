@@ -12,76 +12,52 @@ var (
 	Levels   = make(map[string]int)
 )
 
-func Levelchecker() {
-	visited := make(map[string]bool)
+func Delet_Duplicated_Pather() {
+    alli := [][]string{}
+    allf := [][]string{}
 
-	// BFS queue
-	queue := []string{Data.Start}
-	Levels[Data.Start] = 0
-	visited[Data.Start] = true
+    for k, path := range AllPaths {
+        alli = append(alli, path)
+        Exists = make(map[string]bool)
 
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
+        for i := 1; i < len(path)-1; i++ {
+            Exists[path[i]] = true
+        }
+        for j, v := range AllPaths {
+            if j != k {
 
-		for _, neighbor := range Data.Links[current] {
-			if !visited[neighbor] {
-				visited[neighbor] = true
-				Levels[neighbor] = Levels[current] + 1
-				queue = append(queue, neighbor)
-			}
-		}
-	}
-}
+                for i := 0; i < len(v); i++ {
 
-func SV(end string, Ta []string) {
-	if _, ok := Data.Links[end]; !ok {
-		return
-	}
+                    if Exists[v[i]] {
+                        break
+                    }
+                    Ta = append(Ta, v[i])
+                }
+                if len(Ta) == len(v) {
+                    alli = append(alli, Ta)
 
-	for _, v := range Data.Links[end] {
+                    for i := 1; i < len(v)-1; i++ {
+                        Exists[v[i]] = true
+                    }
 
-		if Exists[Ta[len(Ta)-1]] {
-			return
-		}
-		if Exists[v] {
-			continue
-		}
-		if v == Data.End {
+                }
 
-			Ta = append(Ta, v)
-
-			for j := 1; j < len(Ta)-1; j++ {
-				Exists[Ta[j]] = true
-			}
-
-			AllPaths = append(AllPaths, Ta)
-
-			return
-
-		}
-
-		if Visited[v] || Levels[end]>Levels[v]{
-			continue
-		}
-
-		// Chana<-v
-		Visited[v] = true
-		newTa := make([]string, len(Ta))
-		copy(newTa, Ta)
-		newTa = append(newTa, v)
-		SV(v, newTa)
-		Visited[v] = false
-	}
+            }
+            Ta = []string{}
+        }
+        if len(allf) < len(alli) {
+            allf = alli
+        }
+        alli = [][]string{}
+    }
+    AllPaths = allf
 }
 
 func FindPaths() {
-	Levelchecker()
+
 	Ta = []string{Data.Start}
 
-	Visited[Data.Start] = true
 
-	SV(Data.Start, Ta)
 }
 
 type Room struct {
