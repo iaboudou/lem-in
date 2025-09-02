@@ -2,19 +2,35 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"lem_in/helpers"
 )
 
 func main() {
-	if err := helpers.HandleError("test.txt"); err != nil {
+	args := os.Args[1:]
+	if len(args) != 1 {
+		fmt.Println("ERROR: " + "Invalid number of arguments usage Example => go run . test.txt : ")
+		return
+	}
+	file := args[0]
+
+	if err := helpers.HandleError(file); err != nil {
 		fmt.Println(err)
 		return
 	}
-	for _, v := range helpers.FindPaths() {
-		fmt.Println(v)
+	
+	AllPaths := helpers.FindPaths()
+	if AllPaths == nil {
+		fmt.Println("ERROR: " + "You don't have any links in your file : ")
+		return
 	}
-	fmt.Println("*************************\n***************************")
-	fp := helpers.FindPaths()
-	helpers.Solve(fp)
+	FileContent, err := os.ReadFile(helpers.PathFiles + file)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(FileContent)+"\n")
+
+	helpers.Solve(AllPaths)
 }

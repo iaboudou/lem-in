@@ -1,37 +1,31 @@
-package bfs
+package helpers
 
 import (
 	"fmt"
-
-	"lemin/config"
 )
 
-var (
-	Ta = []string{}
+// FindPaths finds all valid paths and remove the ones who have the same room.
+func FindPaths() [][]string {
+	AllPaths := [][]string{}
 
-	Visited = make(map[string]bool)
-	Exists  = make(map[string]bool)
+	Exists := make(map[string]bool)
 
-	AllPaths = [][]string{}
-	Levels   = make(map[string]int)
-)
-
-func BFS() {
-	if len(config.Data.Links) == 0 {
-		return
+	if len(Data.Links) == 0 {
+		return nil
 	}
-	q := [][]string{{config.Data.Start}}
 
+	q := [][]string{{Data.Start}}
 	visited := map[string]int{}
+
 	for len(q) > 0 {
 		path := q[0]
 		last := path[len(path)-1]
 		q = q[1:]
-		for _, n := range config.Data.Links[last] {
-			if visited[n] > 50 {
+		for _, n := range Data.Links[last] {
+			if visited[n] > 1 {
 				continue
 			}
-			if n == config.Data.Start {
+			if n == Data.Start {
 				continue
 			}
 			if Exists[n] {
@@ -39,9 +33,8 @@ func BFS() {
 			}
 			temp := append([]string{}, path...)
 			temp = append(temp, n)
-			//	fmt.Println("***", temp)
 
-			if n == config.Data.End {
+			if n == Data.End {
 				AllPaths = append(AllPaths, temp)
 			} else {
 				q = append(q, temp)
@@ -50,23 +43,10 @@ func BFS() {
 		}
 	}
 
-	/*for i := 0; i < len(AllPaths); i++ {
-	loop:
-		for j := 1; j < len(AllPaths[i])-1; j++ {
-			for k := 1; k != i && k < len(AllPaths); k++ {
-				if len(AllPaths[i]) <= len(AllPaths[k]) && AllPaths[i][j] == AllPaths[k][j] {
-					AllPaths = append(AllPaths[:k], AllPaths[k+1:]...)
-					i--
-					break loop
-				}
-			}
-		}
-	}*/
-}
 
-func Delet_Duplicated_Pather() {
-	alli := [][]string{}
 	allf := [][]string{}
+	alli := [][]string{}
+	Ta := []string{}
 
 	for k, path := range AllPaths {
 		alli = append(alli, path)
@@ -77,9 +57,7 @@ func Delet_Duplicated_Pather() {
 		}
 		for j, v := range AllPaths {
 			if j != k {
-
 				for i := 0; i < len(v); i++ {
-
 					if Exists[v[i]] {
 						break
 					}
@@ -93,7 +71,6 @@ func Delet_Duplicated_Pather() {
 					}
 
 				}
-
 			}
 			Ta = []string{}
 		}
@@ -102,19 +79,7 @@ func Delet_Duplicated_Pather() {
 		}
 		alli = [][]string{}
 	}
-	AllPaths = allf
-}
-
-func FindPaths() {
-	BFS()
-	// fmt.Println("----",Data.Links[Data.Start])
-	// fmt.Println("****************************")
-	// fmt.Println(Data.Links[Data.End])
-
-	Delet_Duplicated_Pather()
-	for _, v := range AllPaths {
-		fmt.Println(v)
-	}
+	return allf
 }
 
 type Room struct {
@@ -139,11 +104,11 @@ func PirntNmla(Path []*Room, indexPath int) {
 		to := Path[i+1].Name
 		fromIdNmla := Path[i].Nmla
 
-		if fromIdNmla == 0 || Path[i+1].Nmla != 0 && to != config.Data.End {
+		if fromIdNmla == 0 || Path[i+1].Nmla != 0 && to != Data.End {
 			continue
 		}
 
-		if to == config.Data.End {
+		if to == Data.End {
 			finished++
 		}
 
@@ -152,14 +117,14 @@ func PirntNmla(Path []*Room, indexPath int) {
 
 		fmt.Printf("L%d-%s ", fromIdNmla, to)
 
-		if i == 1 && config.Data.Nmber_Ants-IdNmla < len(Path)-2 {
+		if i == 1 && Data.Nmber_Ants-IdNmla < len(Path)-2 {
 			if indexPath != 0 && (len(NewPaths[indexPath])-len(NewPaths[indexPath-1]) > 1) {
 				return
 			}
 		}
 	}
 
-	if IdNmla <= config.Data.Nmber_Ants && Path[1].Nmla == 0 {
+	if IdNmla <= Data.Nmber_Ants && Path[1].Nmla == 0 {
 		if len(Path) == 2 {
 			fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
 			IdNmla++
@@ -167,7 +132,7 @@ func PirntNmla(Path []*Room, indexPath int) {
 			return
 		}
 		Path[1].Nmla = IdNmla
-		if Path[1].Name == config.Data.End {
+		if Path[1].Name == Data.End {
 			finished++
 		}
 		fmt.Printf("L%d-%s ", IdNmla, Path[1].Name)
@@ -175,7 +140,7 @@ func PirntNmla(Path []*Room, indexPath int) {
 	}
 }
 
-// this fucntion try to loop over the path it print all the moves did to reach the end, it take a matrix of string the initlialize a room in every case
+// this function try to loop over the path it print all the moves did to reach the end, it take a matrix of string the initlialize a room in every case
 func Solve(Paths [][]string) {
 	NewPaths = make([][]*Room, len(Paths))
 	for i, Path := range Paths {
@@ -186,7 +151,7 @@ func Solve(Paths [][]string) {
 		NewPaths[i] = Pth
 	}
 
-	for finished < config.Data.Nmber_Ants {
+	for finished < Data.Nmber_Ants {
 		for i := 0; i < len(NewPaths); i++ {
 			PirntNmla(NewPaths[i], i)
 		}
