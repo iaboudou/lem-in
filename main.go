@@ -13,8 +13,8 @@ func main() {
 		fmt.Println("ERROR: " + "Invalid number of arguments usage Example => go run . test.txt : ")
 		return
 	}
-	file := args[0]
 
+	file := args[0]
 	if err := helpers.HandleError(file); err != nil {
 		fmt.Println(err)
 		return
@@ -25,6 +25,7 @@ func main() {
 		fmt.Println("ERROR: " + "You don't have any links in your file : ")
 		return
 	}
+	
 	FileContent, err := os.ReadFile(helpers.PathFiles + file)
 	if err != nil {
 		fmt.Println(err)

@@ -28,7 +28,7 @@ var Data = Lemin{
 	Links: make(map[string][]string),
 }
 
-// function to check if the room is valid or no 
+// function to check if the room is valid or no
 func IsValidRoom(line *string) bool {
 	if (*line)[0] == 'L' {
 		return false
@@ -66,7 +66,7 @@ func ExtractDataRoom(line *string) (string, int, int) {
 	return NameRoom, x, y
 }
 
-// function to check if the link between rooms if is valid or no 
+// function to check if the link between rooms if is valid or no
 func IsValidLink(line *string) bool {
 	Chunks := strings.Split(*line, "-")
 	if len(Chunks) != 2 || len(Chunks[0]) > 50 || len(Chunks[1]) > 50 {
@@ -85,7 +85,7 @@ func IsValidLink(line *string) bool {
 	return true
 }
 
-// function to extract the name of the rooms witch they are connected 
+// function to extract the name of the rooms witch they are connected
 func ExtractDataLink(line *string) (string, string) {
 	var NameRoom1, NameRoom2 string
 	Arr := strings.Split(*line, "-")
@@ -135,14 +135,40 @@ func HandleError(file string) error {
 		IsValidLinkV := IsValidLink(&line)
 
 		// Skip commants and ##start + ##end
-		if line == "##start" && IndexOfLine+1 < len(ArrFile) && IsValidRoom(&ArrFile[IndexOfLine+1]) {
-			Data.Start, _, _ = ExtractDataRoom(&ArrFile[IndexOfLine+1])
-			FoundStart++
+		if line == "##start" && IndexOfLine+1 < len(ArrFile) && (IsValidRoom(&ArrFile[IndexOfLine+1]) || (ArrFile[IndexOfLine+1][0] == '#' && !(ArrFile[IndexOfLine+1] == "##start" || ArrFile[IndexOfLine+1] == "##end"))) {
+			if ArrFile[IndexOfLine+1][0] == '#' && !(ArrFile[IndexOfLine+1] == "##start" || ArrFile[IndexOfLine+1] == "##end") {
+				indexTemp := IndexOfLine + 1
+				for indexTemp < len(ArrFile) && (ArrFile[indexTemp][0] == '#' && !(ArrFile[IndexOfLine+1] == "##start" || ArrFile[IndexOfLine+1] == "##end")) {
+					indexTemp++
+				}
+				if IsValidRoom(&ArrFile[indexTemp]) {
+					Data.Start, _, _ = ExtractDataRoom(&ArrFile[indexTemp])
+					FoundStart++
+				} else {
+					return errors.New("ERROR: " + "Problem In your ##start or ##end")
+				}
+			} else {
+				Data.Start, _, _ = ExtractDataRoom(&ArrFile[IndexOfLine+1])
+				FoundStart++
+			}
 			continue
 		}
-		if line == "##end" && IndexOfLine+1 < len(ArrFile) && IsValidRoom(&ArrFile[IndexOfLine+1]) {
-			Data.End, _, _ = ExtractDataRoom(&ArrFile[IndexOfLine+1])
-			FoundEnd++
+		if line == "##end" && IndexOfLine+1 < len(ArrFile) && (IsValidRoom(&ArrFile[IndexOfLine+1]) || (ArrFile[IndexOfLine+1][0] == '#' && !(ArrFile[IndexOfLine+1] == "##start" || ArrFile[IndexOfLine+1] == "##end"))) {
+			if ArrFile[IndexOfLine+1][0] == '#' && !(ArrFile[IndexOfLine+1] == "##start" || ArrFile[IndexOfLine+1] == "##end") {
+				indexTemp := IndexOfLine + 1
+				for indexTemp < len(ArrFile) && (ArrFile[indexTemp][0] == '#' && !(ArrFile[IndexOfLine+1] == "##start" || ArrFile[IndexOfLine+1] == "##end")) {
+					indexTemp++
+				}
+				if IsValidRoom(&ArrFile[indexTemp]) {
+					Data.End, _, _ = ExtractDataRoom(&ArrFile[indexTemp])
+					FoundEnd++
+				} else {
+					return errors.New("ERROR: " + "Problem In your ##start or ##end")
+				}
+			} else {
+				Data.End, _, _ = ExtractDataRoom(&ArrFile[IndexOfLine+1])
+				FoundEnd++
+			}
 			continue
 		}
 		if line[0] == '#' && !(line == "##start" || line == "##end") {
