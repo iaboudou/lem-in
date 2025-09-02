@@ -22,7 +22,7 @@ func FindPaths() [][]string {
 		last := path[len(path)-1]
 		q = q[1:]
 		for _, n := range Data.Links[last] {
-			if visited[n] > 1 {
+			if visited[n] > (30 * Data.Nmber_Ants) / 100 {
 				continue
 			}
 			if n == Data.Start {
