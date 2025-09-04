@@ -191,6 +191,11 @@ func HandleError(file string) error {
 		}
 		if IsValidRoomV && InRooms {
 			NameRoom, x, y := ExtractDataRoom(&line)
+			for _, v := range Data.Roms{
+				if v.X == x && v.Y == y{
+					return errors.New("ERROR: " + "You put multiple room in the same position : " + line)
+				}
+			}
 			Data.Roms[NameRoom] = Romms{X: x, Y: y}
 			continue
 		} else if IsValidLinkV && InRooms {
